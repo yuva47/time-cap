@@ -3,7 +3,14 @@ from collections.abc import Callable
 from datetime import datetime
 
 logger = logging.getLogger(__name__)
-logger.addHandler(logging.NullHandler())
+
+if not logger.hasHandlers():
+    logging.basicConfig(
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        level=logging.INFO,
+    )
+    logger.setLevel(logging.INFO)
+
 
 def time_cap(fn: Callable):
     """
@@ -17,17 +24,21 @@ def time_cap(fn: Callable):
         result = fn(*args, **kwargs)
         end_time = datetime.now()
         execution_seconds = end_time - start_time
-        logging.info(f"{fn.__name__} took {execution_seconds.total_seconds() * 1000} milliseconds")
+        logging.info(
+            f"{fn.__name__} function took "
+            f"{execution_seconds.total_seconds() * 1000} milliseconds"
+        )
         return result
 
     return wrapper
+
 
 @time_cap
 def dummy_func():
     import time
     time.sleep(2)
 
+
 if __name__ == "__main__":
     logging.basicConfig(level="INFO")
     dummy_func()
-
